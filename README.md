@@ -6,7 +6,7 @@ Welcome to **Match The Cards**, a fun and challenging card-matching game where y
 
 The DynamoDB database used for storing leaderboard scores is currently restricted with certain permissions and is a work in progress to be made public. Please be aware that the leaderboard functionality may not be fully accessible at this time.
 
-![Menu Background](img/menubg.png)
+![Menu Background](img/menu-full.jpg)
 Welcome to **Match The Cards**, a fun and challenging card-matching game where you need to find pairs of matching cards in the shortest time possible! 
 
 ## 🛠️ Game Features
