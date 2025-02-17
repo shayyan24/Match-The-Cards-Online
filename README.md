@@ -1,6 +1,10 @@
 # Match The Cards Game: Online!
 
-Welcome to **Match The Cards**, a fun and challenging card-matching game where you need to find pairs of matching cards in the shortest time possible! Designed and developed by **Shayyan Husein**, this game is built using **Pygame** and custom game management tools.
+Welcome to **Match The Cards**, a fun and challenging card-matching game where you need to find pairs of matching cards in the shortest time possible! Designed and developed by **Shayyan Husein**.
+
+## ⚠️ Important Notice
+
+The DynamoDB database used for storing leaderboard scores is currently restricted with certain permissions and is a work in progress to be made public. Please be aware that the leaderboard functionality may not be fully accessible at this time.
 
 ## 🛠️ Game Features
 
@@ -23,7 +27,7 @@ Welcome to **Match The Cards**, a fun and challenging card-matching game where y
 - **Restart**: Press **RESTART** to start a new game from the final screen.
 - **Exit**: Press **EXIT** to close the game.
 
-## 📊 Leaderboard
+## 📊 Leaderboard (AWS DynamoDB)
 
 - After completing the game, your time will be added to the **Leaderboard**.
 - The top 3 players' times will be displayed, and your rank will be updated if you make it to the top 3.
@@ -38,9 +42,8 @@ Welcome to **Match The Cards**, a fun and challenging card-matching game where y
     pip install pygame
     ```
 
-- **pygameRogers**: A custom game module used for managing game objects and rooms. Ensure the module is available in your environment.
 
-## ⚙️ Installation
+## ⚙️ Installation (WIP)
 
 1. Clone or download the repository to your local machine.
 2. Navigate to the game directory and install Pygame (if not installed yet).
@@ -50,21 +53,10 @@ Welcome to **Match The Cards**, a fun and challenging card-matching game where y
     python match_the_cards.py
     ```
 
-## 🔧 Customization
-
-Feel free to modify the game to add new features, change the design, or adjust the card deck! Here are a few ideas:
-
-- Add more card suits or different game themes.
-- Implement power-ups or hints for players.
-- Add music or sound effects for a more immersive experience.
-
-## 🤝 Contributions
-
-If you want to contribute to this project, feel free to fork the repository, submit pull requests, or report issues. Your contributions are always welcome!
 
 ## 📜 License
 
-This game is open-source and available under the [MIT License](LICENSE). Feel free to modify and distribute it according to the license terms.
+This game is open-source and available under the GNU General Public License (GPL). Feel free to modify and distribute it according to the license terms.
 
 ---
 
