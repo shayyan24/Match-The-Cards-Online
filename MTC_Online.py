@@ -5,7 +5,7 @@ import random
 import sys
 import pygame
 import easygui
-from pygameRogers import *
+from pygameModule import *
 
 # Creating new Game
 g = Game(1280,760)
