@@ -26,18 +26,17 @@ Welcome to **Match The Cards**, a fun and challenging card-matching game where y
 
 
 ## 📊 Leaderboard
-![Picture of Leaderboard](img/finalbg.png)
 - After completing the game, your time will be added to the **Leaderboard**.
 - The top 3 players' times will be displayed, and your rank will be updated if you make it to the top 3.
 - **Username**: You’ll be prompted to enter a username at the beginning of the game.
 
-### AWS DynamoDB
+### 🗃 AWS DynamoDB
 
 The leaderboard scores are stored in an AWS DynamoDB database. Below is an example of the DynamoDB table with items in it:
 
 ![AWS DynamoDB Table](img/aws_full.jpg)
 
-### In-Game Leaderboard
+### 🏆 In-Game Leaderboard
 
 The in-game leaderboard displays the top 3 fastest times. Below is an example of the populated leaderboard from the Pygame window:
 
