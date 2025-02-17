@@ -5,7 +5,13 @@ import random
 import sys
 import pygame
 import easygui
+import boto3
+from boto3.dynamodb.conditions import Key
 from pygameModule import *
+
+# Initialize DynamoDB client
+dynamodb = boto3.resource('dynamodb', region_name='us-east-2')
+table = dynamodb.Table('Scores')
 
 # Creating new Game
 g = Game(1280,760)
@@ -236,148 +242,118 @@ class ExitButton(TextRectangle):
 # Time Display Class
 class DisplayTimer(TextRectangle):
 
-	def __init__(self,text, xPos, yPos, font, textColor, buttonWidth = None, buttonHeight = None, buttonColor = None):
-		TextRectangle.__init__(self,text, xPos, yPos, font, textColor, buttonWidth, buttonHeight, buttonColor)
+    def __init__(self, text, xPos, yPos, font, textColor, buttonWidth=None, buttonHeight=None, buttonColor=None):
+        TextRectangle.__init__(self, text, xPos, yPos, font, textColor, buttonWidth, buttonHeight, buttonColor)
+        self.seconds = int(text)
+        self.timer = Alarm()
+        self.minutes = 0
+        self.winningTimeSeconds = 0
+        self.printTime = True
+        self.setup = True
+        self.hasRestarted = False
 
-		# Creating Timer variable for timer loop below
-		self.seconds = int(text) 
-		self.timer = Alarm()
-		self.minutes = 0
-		self.winningTimeSeconds = 0
-		self.printTime = True
-		self.setup = True
-		self.hasRestarted = False
+    def restart(self):
+        self.timer = Alarm()
+        self.seconds = 0
+        self.minutes = 0
+        self.winningTimeSeconds = 0
+        self.printTime = True
+        self.setup = True
+        deck.cardsGone = 0
+        self.hasRestarted = True
 
-	# Restarts variables for reiteration of game
-	def restart(self):
-		self.timer = Alarm()
-		self.seconds = 0
-		self.minutes = 0
-		self.winningTimeSeconds = 0
-		self.printTime = True
-		self.setup = True
-		deck.cardsGone = 0
-		self.hasRestarted = True
+    def timeManager(self):
+        if self.seconds > 59:
+            self.seconds = 0
+            self.minutes += 1
+        if self.seconds < 10:
+            self.extraZero = "0"
+        else:
+            self.extraZero = ""
+        self.text = str(self.minutes) + ":" + (self.extraZero) + str(self.seconds)
 
+    def update(self):
+        if self.setup:
+            self.timer.setAlarm(1000)
+            self.setup = False
+        self.timeManager()
+        self.setText(self.text)
 
-	# Manages how the time is displayed
-	def timeManager(self):
+        if self.timer.finished() and self.seconds >= 0 and deck.cardsGone != 36:
+            self.timer.setAlarm(1000)
+            self.seconds += 1
+        elif deck.cardsGone == 36 and self.printTime:
+            self.winningTimeSeconds = self.seconds + self.minutes * 60
+            print(self.winningTimeSeconds, " seconds is your time.")
+            self.printTime = False
 
-		# if the seconds is over 60, make it 0 and add 1 to minutes
-		if self.seconds > 59:
-			self.seconds = 0
-			self.minutes += 1
-		if self.seconds < 10:
-			self.extraZero = "0"
-		else:
-			self.extraZero = ""
+            # Store the score in DynamoDB
+            table.put_item(
+                Item={
+                    'Username': username.username,
+                    'Score': self.winningTimeSeconds
+                }
+            )
 
-		# set self.text to the minutes and seconds
-		self.text = str(self.minutes) + ":" + (self.extraZero) + str(self.seconds)
+            # Store the current player's winning time in the username object
+            username.WinningSeconds = self.winningTimeSeconds
 
-
-
-
-	# Update Game 
-	def update(self):
-		if self.setup:
-			self.timer.setAlarm(1000)
-			self.setup = False
-		self.timeManager()
-		self.setText(self.text)
-
-		# Runs a timer until timer variable reaches 0
-		if self.timer.finished() and self.seconds >= 0 and deck.cardsGone != 36:
-			self.timer.setAlarm(1000)
-			self.seconds += 1
-		elif deck.cardsGone == 36 and self.printTime:
-			self.winningTimeSeconds = self.seconds + self.minutes*60
-			print(self.winningTimeSeconds, " seconds is your time.")
-			self.printTime = False 
-			
-			# Outputting the username and time to a file and sorting it by time (lowest to highest)
-			f = open("scores.txt", "a")
-			f.write(username.username + "," + str(self.winningTimeSeconds) + "\n")			
-			f.close()
-
-			# Moving to the highscores room
-			g.goToRoom(2)
+            # Moving to the highscores room
+            g.goToRoom(2)
 
 # Text to display Username
 class Username(TextRectangle):
 
-	def __init__(self,text, xPos, yPos, font, textColor, buttonWidth = None, buttonHeight = None, buttonColor = None):
-		TextRectangle.__init__(self,text, xPos, yPos, font, textColor, buttonWidth, buttonHeight, buttonColor)
-		self.setup = True
-		self.timer = Alarm()
-		self.timer.setAlarm(100)
-		
-	
-	def update(self):
-		if self.setup and self.timer.finished():
-			self.username = easygui.enterbox("What is your username? (1 Character Min, 20 Character Max)", "Enter Username to Continue")
-			while self.username == None or self.username == "" or (len(self.username)) > 20:
-				self.username = easygui.enterbox("What is your username? (1 Character Min, 20 Character Max)", "Enter Username to Continue")
-			self.setText(self.username)
-			self.rect.x = 1150 - (len(self.username)*20)
-			self.setup = False
+    def __init__(self, text, xPos, yPos, font, textColor, buttonWidth=None, buttonHeight=None, buttonColor=None):
+        TextRectangle.__init__(self, text, xPos, yPos, font, textColor, buttonWidth, buttonHeight, buttonColor)
+        self.setup = True
+        self.timer = Alarm()
+        self.timer.setAlarm(100)
+        self.WinningSeconds = 0  # Initialize WinningSeconds attribute
+
+    def update(self):
+        if self.setup and self.timer.finished():
+            self.username = easygui.enterbox("What is your username? (1 Character Min, 20 Character Max)", "Enter Username to Continue")
+            while self.username == None or self.username == "" or (len(self.username)) > 20:
+                self.username = easygui.enterbox("What is your username? (1 Character Min, 20 Character Max)", "Enter Username to Continue")
+            self.setText(self.username)
+            self.rect.x = 1150 - (len(self.username) * 20)
+            self.setup = False
 
 # Leaderboard Display
 class LeaderboardDisplay(TextRectangle):
 
-	def __init__(self,text, xPos, yPos, font, textColor, buttonWidth = None, buttonHeight = None, buttonColor = None):
-		TextRectangle.__init__(self,text, xPos, yPos, font, textColor, buttonWidth, buttonHeight, buttonColor)
-		
+    def __init__(self, text, xPos, yPos, font, textColor, buttonWidth=None, buttonHeight=None, buttonColor=None):
+        TextRectangle.__init__(self, text, xPos, yPos, font, textColor, buttonWidth, buttonHeight, buttonColor)
 
-	# convert seconds to minutes and seconds
-	def secondsToTime(self, seconds):
-		seconds = int(seconds)
-		mins = seconds // 60
-		secs = seconds % 60
-		# if the seconds is less than 10, add a 0 in front of it
-		if secs < 10:
-			extraZero = "0"
-		else:
-			extraZero = ""
+    def secondsToTime(self, seconds):
+        seconds = int(seconds)
+        mins = seconds // 60
+        secs = seconds % 60
+        if secs < 10:
+            extraZero = "0"
+        else:
+            extraZero = ""
+        return str(mins) + ":" + (extraZero) + str(secs)
 
-		timeString = str(mins) + ":" + (extraZero) + str(secs)
-		# set self.text to the minutes and seconds
-		return timeString
+    def update(self):
+        # Retrieve scores from DynamoDB
+        response = table.scan()
+        leaderboard = response['Items']
 
+        # Sort the leaderboard based on scores
+        newLeaderboard = sorted(leaderboard, key=lambda x: int(x['Score']))
 
-	# Update Game
-	def update(self):
-	
-		# open the file
-		f = open("scores.txt", "r")
+        p1.setText(newLeaderboard[0]['Username'])
+        s1.setText(self.secondsToTime(newLeaderboard[0]['Score']))
+        p2.setText(newLeaderboard[1]['Username'])
+        s2.setText(self.secondsToTime(newLeaderboard[1]['Score']))
+        p3.setText(newLeaderboard[2]['Username'])
+        s3.setText(self.secondsToTime(newLeaderboard[2]['Score']))
 
-		# take the first 3 lines as 3 different list
-		leaderboard = []
-		while True:
-			line = f.readline()
-			if line == "":
-				break
-			else:
-
-				tokens = line.split(",")
-
-				row = []
-				row.append(tokens[0])
-				# strip out the newline character
-				row.append(tokens[1].strip("\n"))
-				leaderboard.append(row)
-
-		# sorting the leaderboard based on seconds taken to complete the game
-		newLeaderboard = sorted(leaderboard, key=lambda x: int(x[1]))
-
-		p1.setText(newLeaderboard[0][0])
-		s1.setText(self.secondsToTime(newLeaderboard[0][1]))
-		p2.setText(newLeaderboard[1][0])
-		s2.setText(self.secondsToTime(newLeaderboard[1][1]))
-		p3.setText(newLeaderboard[2][0])
-		s3.setText(self.secondsToTime(newLeaderboard[2][1]))
-		cp.setText(username.username)
-		cs.setText(self.secondsToTime(leaderboard[-1][1]))
+        # Set the current player's score
+        cp.setText(username.username)
+        cs.setText(self.secondsToTime(username.WinningSeconds))
 
 #------------------------------- INITIALIZE OBJECTS AND ADD THEM TO THEIR ROOMS ----------------------------------
 
