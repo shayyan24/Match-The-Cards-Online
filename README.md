@@ -33,6 +33,18 @@ The DynamoDB database used for storing leaderboard scores is currently restricte
 - The top 3 players' times will be displayed, and your rank will be updated if you make it to the top 3.
 - **Username**: You’ll be prompted to enter a username at the beginning of the game.
 
+### AWS DynamoDB
+
+The leaderboard scores are stored in an AWS DynamoDB database. Below is an example of the DynamoDB table with items in it:
+
+![AWS DynamoDB Table](img/aws_full.jpg)
+
+### In-Game Leaderboard
+
+The in-game leaderboard displays the top 3 fastest times. Below is an example of the populated leaderboard from the Pygame window:
+
+![In-Game Leaderboard](img/leaderboard-full.jpg)
+
 ## 🖥️ Requirements
 
 - **Python 3.x**: Ensure you have Python 3.x installed on your system.
@@ -42,22 +54,34 @@ The DynamoDB database used for storing leaderboard scores is currently restricte
     pip install pygame
     ```
 
-
-## ⚙️ Installation (WIP)
+## ⚙️ Installation
 
 1. Clone or download the repository to your local machine.
-2. Navigate to the game directory and install Pygame (if not installed yet).
-3. Run the game script using:
+2. Navigate to the game directory.
+3. Install the required Python packages:
 
     ```bash
-    python match_the_cards.py
+    pip install -r requirements.txt
     ```
 
+4. Set up the environment variables for AWS credentials. Create a `.env` file in the root directory of the project and add the following lines:
 
-## 📜 License
+    ```plaintext
+    AWS_ACCESS_KEY_ID=your_access_key_id
+    AWS_SECRET_ACCESS_KEY=your_secret_access_key
+    AWS_REGION=us-east-2
+    ```
 
-This game is open-source and available under the GNU General Public License (GPL). Feel free to modify and distribute it according to the license terms.
+5. Run the game script using:
 
----
+    ```bash
+    python MTC_Online.py
+    ```
 
-Enjoy playing **Match The Cards**, and may you match those pairs faster than anyone else! 🃏♠️♥️♣️♦️
+### Example `.env` File
+
+```plaintext
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_REGION=us-east-2
+```
