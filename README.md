@@ -75,7 +75,6 @@ The in-game leaderboard displays the top 3 fastest times. Below is an example of
     ```
 =======
 ## 📜 License
->>>>>>> b5e8ef6d5367ab48759490db0b461d03869b2af5
 
 5. Run the game script using:
 
